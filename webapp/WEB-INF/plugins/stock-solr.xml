@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?><plug-in>
+
+	<name>stock-solr</name>
+	<class>fr.paris.lutece.plugins.stock.modules.solr.service.StockSolrPlugin</class>
+	<version>1.0.2</version>
+	<documentation/>
+	<installation/>
+	<changes/>
+	<user-guide/>
+	<description>module.stock.solr.module.description</description>
+	<provider>module.stock.solr.module.provider</provider>
+	<provider-url>http://lutece.paris.fr</provider-url>
+	<icon-url>images/admin/skin/plugins/stock/modules/solr/stock-solr.png</icon-url>
+	<copyright>Copyright 2001-2011 Mairie de Paris</copyright>
+	<core-version-dependency>
+		<min-core-version>2.9.9</min-core-version>
+		<max-core-version/>
+	</core-version-dependency>
+
+
+	<db-pool-required>0</db-pool-required>
+	
+
+	<!-- Administration interface parameters -->
+	<admin-features>
+				
+	</admin-features>	
+	
+
+	<!-- Content Service -->
+<!-- 	<content-services> -->
+<!-- 		<content-service> -->
+<!-- 			<content-service-class> -->
+<!-- 				fr.paris.lutece.plugins.stock.modules.solr.business.SolrStockContentService -->
+<!-- 			</content-service-class> -->
+<!-- 		</content-service> -->
+<!-- 	</content-services> -->
+	
+</plug-in>
