@@ -2,7 +2,7 @@
 
 	<name>stock-solr</name>
 	<class>fr.paris.lutece.plugins.stock.modules.solr.service.StockSolrPlugin</class>
-	<version>1.0.2</version>
+	<version>1.0.0</version>
 	<documentation/>
 	<installation/>
 	<changes/>
