@@ -33,6 +33,22 @@
  */
 package fr.paris.lutece.plugins.stock.modules.solr.indexer;
 
+import fr.paris.lutece.plugins.search.solr.business.field.Field;
+import fr.paris.lutece.plugins.search.solr.indexer.SolrIndexer;
+import fr.paris.lutece.plugins.search.solr.indexer.SolrIndexerService;
+import fr.paris.lutece.plugins.search.solr.indexer.SolrItem;
+import fr.paris.lutece.plugins.search.solr.util.SolrConstants;
+import fr.paris.lutece.plugins.stock.business.attribute.product.ProductAttribute;
+import fr.paris.lutece.plugins.stock.business.attribute.product.ProductAttributeDate;
+import fr.paris.lutece.plugins.stock.business.attribute.product.ProductAttributeNum;
+import fr.paris.lutece.plugins.stock.business.attribute.provider.ProviderAttribute;
+import fr.paris.lutece.plugins.stock.business.category.Category;
+import fr.paris.lutece.plugins.stock.business.product.Product;
+import fr.paris.lutece.plugins.stock.service.IProductService;
+import fr.paris.lutece.portal.service.util.AppLogService;
+import fr.paris.lutece.portal.service.util.AppPropertiesService;
+import fr.paris.lutece.util.url.UrlItem;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,29 +58,21 @@ import javax.inject.Named;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-import fr.paris.lutece.plugins.search.solr.business.field.Field;
-import fr.paris.lutece.plugins.search.solr.indexer.SolrIndexer;
-import fr.paris.lutece.plugins.search.solr.indexer.SolrIndexerService;
-import fr.paris.lutece.plugins.search.solr.indexer.SolrItem;
-import fr.paris.lutece.plugins.search.solr.util.SolrConstants;
-import fr.paris.lutece.plugins.stock.business.attribute.product.ProductAttribute;
-import fr.paris.lutece.plugins.stock.business.attribute.product.ProductAttributeDate;
-import fr.paris.lutece.plugins.stock.business.attribute.product.ProductAttributeNum;
-import fr.paris.lutece.plugins.stock.business.product.Product;
-import fr.paris.lutece.plugins.stock.service.IProductService;
-import fr.paris.lutece.portal.service.util.AppLogService;
-import fr.paris.lutece.portal.service.util.AppPropertiesService;
-import fr.paris.lutece.util.url.UrlItem;
-
 
 /**
  * The indexer service for Solr.
- *
+ * 
  */
 public class SolrStockIndexer implements SolrIndexer
 {
+    private static final String FIELD_PROVIDER_ADRESS = "fournisseur_adress";
     private static final String FIELD_PROVIDER = "fournisseur";
-    private static final String FIELD_PRICE = "prix";
+    private static final String FIELD_ID = "id";
+    private static final String FIELD_FULL = "full";
+    private static final String FIELD_TARIF_REDUIT = "tarif_reduit";
+    private static final String FIELD_INVITATION = "invitation";
+    private static final String FIELD_INVITATION_ENFANT = "invitation_enfant";
+
     // Not used
     // private static final String PARAMETER_SOLR_DOCUMENT_ID = "solr_document_id";
     private static final String PROPERTY_INDEXER_ENABLE = "stock-solr.indexer.enable";
@@ -75,24 +83,24 @@ public class SolrStockIndexer implements SolrIndexer
     private static final String PROPERTY_SUMMARY_SIZE = "stock-solr.indexer.summary.size";
     private static final String PROPERTY_TYPE = "stock-solr.indexer.type";
     private static final String PARAMETER_STOCK_ID = "product_id";
-    private static final List<String> LIST_RESSOURCES_NAME = new ArrayList<String>(  );
+    private static final List<String> LIST_RESSOURCES_NAME = new ArrayList<String>( );
     private static final String SHORT_NAME = "doc";
-    
+
     private static final String DOC_INDEXATION_ERROR = "[SolrDocIndexer] An error occured during the indexation of the stock number ";
 
-	@Inject
-	@Named( "stock.productService" )
+    @Inject
+    @Named( "stock.productService" )
     private IProductService productService;
 
     /**
      * Creates a new SolrPageIndexer
      */
-    public SolrStockIndexer(  )
+    public SolrStockIndexer( )
     {
         LIST_RESSOURCES_NAME.add( "DOCUMENT_STOCK" );
     }
 
-    public boolean isEnable(  )
+    public boolean isEnable( )
     {
         return "true".equalsIgnoreCase( AppPropertiesService.getProperty( PROPERTY_INDEXER_ENABLE ) );
     }
@@ -108,6 +116,7 @@ public class SolrStockIndexer implements SolrIndexer
         List<Product> listProduct = productService.getAllProduct( );
         for ( Product ticketProduct : listProduct )
         {
+
             try
             {
                 // Generates the item to index
@@ -149,7 +158,7 @@ public class SolrStockIndexer implements SolrIndexer
         item.setUrl( url.getUrl( ) );
 
         List<String> categories = new ArrayList<String>( );
-        fr.paris.lutece.plugins.stock.business.category.Category category = product.getCategory( );
+        Category category = product.getCategory( );
         // Récupère la hierarchie de catégorie
         while ( category != null )
         {
@@ -158,14 +167,30 @@ public class SolrStockIndexer implements SolrIndexer
         }
         item.setCategorie( categories );
 
-        if ( product.getPrice( ) != null )
-        {
-            item.addDynamicField( FIELD_PRICE, new Long( Math.round( product.getPrice( ) ) ) );
-        }
+        item.addDynamicFieldNotAnalysed( FIELD_FULL, productService.isFull( product.getId( ) ).toString( ) );
+        item.addDynamicFieldNotAnalysed( FIELD_TARIF_REDUIT, productService.isType( product.getId( ), 1 ).toString( ) );
+        item.addDynamicFieldNotAnalysed( FIELD_INVITATION, productService.isType( product.getId( ), 2 ).toString( ) );
+        item.addDynamicFieldNotAnalysed( FIELD_INVITATION_ENFANT, productService.isType( product.getId( ), 3 )
+                .toString( ) );
         item.addDynamicFieldNotAnalysed( FIELD_PROVIDER, product.getProvider( ).getName( ) );
+        item.addDynamicFieldNotAnalysed( FIELD_PROVIDER_ADRESS, product.getProvider( ).getAddress( ) );
+
+        item.addDynamicFieldNotAnalysed( FIELD_ID, "" + product.getId( ) );
 
         // Add dynamic attributes
         for ( ProductAttribute attribute : product.getAttributeList( ) )
+        {
+            item.addDynamicFieldNotAnalysed( attribute.getKey( ), attribute.getValue( ) );
+        }
+
+        // Add dynamic attributes
+        for ( ProductAttribute attribute : product.getAttributeList( ) )
+        {
+            item.addDynamicFieldNotAnalysed( attribute.getKey( ), attribute.getValue( ) );
+        }
+
+        // Add dynamic attributes
+        for ( ProviderAttribute attribute : product.getProvider( ).getAttributeList( ) )
         {
             item.addDynamicFieldNotAnalysed( attribute.getKey( ), attribute.getValue( ) );
         }
@@ -182,17 +207,17 @@ public class SolrStockIndexer implements SolrIndexer
         }
 
         // The content
-        item.setContent( product.getName( ) + " - " + product.getDescription( ) );
+        item.setContent( product.getName( ) + " - " + product.getDescription( ) + " - "
+                + product.getProvider( ).getName( ) );
         return item;
     }
-
 
     //GETTERS & SETTERS
     /**
      * Returns the name of the indexer.
      * @return the name of the indexer
      */
-    public String getName(  )
+    public String getName( )
     {
         return AppPropertiesService.getProperty( PROPERTY_NAME );
     }
@@ -201,7 +226,7 @@ public class SolrStockIndexer implements SolrIndexer
      * Returns the version.
      * @return the version.
      */
-    public String getVersion(  )
+    public String getVersion( )
     {
         return AppPropertiesService.getProperty( PROPERTY_VERSION );
     }
@@ -209,7 +234,7 @@ public class SolrStockIndexer implements SolrIndexer
     /**
      * {@inheritDoc}
      */
-    public String getDescription(  )
+    public String getDescription( )
     {
         return AppPropertiesService.getProperty( PROPERTY_DESCRIPTION );
     }
@@ -217,7 +242,7 @@ public class SolrStockIndexer implements SolrIndexer
     /**
      * {@inheritDoc}
      */
-    public List<Field> getAdditionalFields(  )
+    public List<Field> getAdditionalFields( )
     {
         List<Field> lstFields = new ArrayList<Field>( );
         return lstFields;
@@ -261,7 +286,6 @@ public class SolrStockIndexer implements SolrIndexer
         // return lstFields;
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -286,7 +310,7 @@ public class SolrStockIndexer implements SolrIndexer
     /**
      * {@inheritDoc}
      */
-    public List<String> getResourcesName(  )
+    public List<String> getResourcesName( )
     {
         return LIST_RESSOURCES_NAME;
     }
@@ -296,10 +320,10 @@ public class SolrStockIndexer implements SolrIndexer
      */
     public String getResourceUid( String strResourceId, String strResourceType )
     {
-    	StringBuffer sb = new StringBuffer( strResourceId );
-    	sb.append( SolrConstants.CONSTANT_UNDERSCORE ).append( SHORT_NAME );
-        
-    	return sb.toString(  );
+        StringBuffer sb = new StringBuffer( strResourceId );
+        sb.append( SolrConstants.CONSTANT_UNDERSCORE ).append( SHORT_NAME );
+
+        return sb.toString( );
     }
 
 }
