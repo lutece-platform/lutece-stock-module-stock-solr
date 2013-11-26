@@ -66,6 +66,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SolrStockIndexer implements SolrIndexer
 {
     private static final String FIELD_PROVIDER_ADRESS = "fournisseur_adress";
+    private static final String FIELD_TITLE = "title";
     private static final String FIELD_PROVIDER = "fournisseur";
     private static final String FIELD_ID = "id";
     private static final String FIELD_FULL = "full";
@@ -174,6 +175,7 @@ public class SolrStockIndexer implements SolrIndexer
                 .toString( ) );
         item.addDynamicFieldNotAnalysed( FIELD_PROVIDER, product.getProvider( ).getName( ) );
         item.addDynamicFieldNotAnalysed( FIELD_PROVIDER_ADRESS, product.getProvider( ).getAddress( ) );
+        item.addDynamicFieldNotAnalysed( FIELD_TITLE, product.getName( ) );
 
         item.addDynamicFieldNotAnalysed( FIELD_ID, "" + product.getId( ) );
 
