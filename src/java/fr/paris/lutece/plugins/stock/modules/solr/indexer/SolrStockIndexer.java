@@ -42,8 +42,10 @@ import fr.paris.lutece.plugins.stock.business.attribute.product.ProductAttribute
 import fr.paris.lutece.plugins.stock.business.attribute.product.ProductAttributeDate;
 import fr.paris.lutece.plugins.stock.business.attribute.product.ProductAttributeNum;
 import fr.paris.lutece.plugins.stock.business.attribute.provider.ProviderAttribute;
+import fr.paris.lutece.plugins.stock.business.attribute.provider.ProviderAttributeNum;
 import fr.paris.lutece.plugins.stock.business.category.Category;
 import fr.paris.lutece.plugins.stock.business.product.Product;
+import fr.paris.lutece.plugins.stock.service.IDistrictService;
 import fr.paris.lutece.plugins.stock.service.IProductService;
 import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
@@ -92,6 +94,10 @@ public class SolrStockIndexer implements SolrIndexer
     @Inject
     @Named( "stock.productService" )
     private IProductService productService;
+
+    @Inject
+    @Named( "stock.districtService" )
+    private IDistrictService _districtService;
 
     /**
      * Creates a new SolrPageIndexer
@@ -195,6 +201,17 @@ public class SolrStockIndexer implements SolrIndexer
         for ( ProviderAttribute attribute : product.getProvider( ).getAttributeList( ) )
         {
             item.addDynamicFieldNotAnalysed( attribute.getKey( ), attribute.getValue( ) );
+        }
+        for ( ProviderAttributeNum attribute : product.getProvider( ).getAttributeNumList( ) )
+        {
+            if ( attribute.getValue( ) != null )
+            {
+                if ( "district".equals( attribute.getKey( ) ) )
+                {
+                    int districtId = attribute.getValue( ).intValue( );
+                    item.addDynamicFieldNotAnalysed( attribute.getKey( ), _districtService.findLibelleById( districtId ) );
+                }
+            }
         }
         for ( ProductAttributeDate attribute : product.getAttributeDateList( ) )
         {
