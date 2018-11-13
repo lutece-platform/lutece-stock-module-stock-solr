@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <body>
+        <section name="Module stock solr">
+            <subsection name="Introduction">
+                <p>
+                    Ce module permet d'indexer les objets stock dans un serveur solr.
+                </p>
+            </subsection>
+        </section>
+    </body>
+</document>
+          
