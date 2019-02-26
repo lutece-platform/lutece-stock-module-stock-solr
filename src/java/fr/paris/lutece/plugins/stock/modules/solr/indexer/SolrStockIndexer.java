@@ -38,21 +38,28 @@ import fr.paris.lutece.plugins.search.solr.indexer.SolrIndexer;
 import fr.paris.lutece.plugins.search.solr.indexer.SolrIndexerService;
 import fr.paris.lutece.plugins.search.solr.indexer.SolrItem;
 import fr.paris.lutece.plugins.search.solr.util.SolrConstants;
+import fr.paris.lutece.plugins.stock.business.attribute.offer.OfferAttributeDate;
 import fr.paris.lutece.plugins.stock.business.attribute.product.ProductAttribute;
 import fr.paris.lutece.plugins.stock.business.attribute.product.ProductAttributeDate;
 import fr.paris.lutece.plugins.stock.business.attribute.product.ProductAttributeNum;
 import fr.paris.lutece.plugins.stock.business.attribute.provider.ProviderAttribute;
 import fr.paris.lutece.plugins.stock.business.attribute.provider.ProviderAttributeNum;
 import fr.paris.lutece.plugins.stock.business.category.Category;
+import fr.paris.lutece.plugins.stock.business.offer.Offer;
 import fr.paris.lutece.plugins.stock.business.product.Product;
 import fr.paris.lutece.plugins.stock.service.IDistrictService;
+import fr.paris.lutece.plugins.stock.service.IOfferService;
 import fr.paris.lutece.plugins.stock.service.IProductService;
 import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
 import fr.paris.lutece.util.url.UrlItem;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -75,6 +82,7 @@ public class SolrStockIndexer implements SolrIndexer
     private static final String FIELD_TARIF_REDUIT = "tarif_reduit";
     private static final String FIELD_INVITATION = "invitation";
     private static final String FIELD_INVITATION_ENFANT = "invitation_enfant";
+    private static final String FIELD_SHOW_DATES = "show_dates";
 
     // Not used
     // private static final String PARAMETER_SOLR_DOCUMENT_ID = "solr_document_id";
@@ -98,6 +106,10 @@ public class SolrStockIndexer implements SolrIndexer
     @Inject
     @Named( "stock.districtService" )
     private IDistrictService _districtService;
+    
+    @Inject
+    @Named( "stock.offerService" )
+    private IOfferService _offerService;
 
     /**
      * Creates a new SolrPageIndexer
@@ -228,6 +240,19 @@ public class SolrStockIndexer implements SolrIndexer
         // The content
         item.setContent( product.getName( ) + " - " + product.getDescription( ) + " - "
                 + product.getProvider( ).getName( ) );
+        
+        // Indexing show dates
+        List<Offer> offers = _offerService.findByProduct(product.getId());
+        
+        item.addDynamicFieldListDate(FIELD_SHOW_DATES, offers.stream()
+        		.map(Offer::getAttributeDateList)
+        		.flatMap(Collection::stream)
+        		.filter((OfferAttributeDate oad) -> "date".equals(oad.getKey()))
+        		.map(OfferAttributeDate::getValue)
+        		.map(Timestamp::toInstant)
+        		.map(Date::from)
+        		.distinct()
+        		.collect(Collectors.toList()));
         return item;
     }
 
