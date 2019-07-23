@@ -186,11 +186,16 @@ public class SolrStockIndexer implements SolrIndexer
         }
         item.setCategorie( categories );
 
+        String keyDate = "date";
+        String annuleKey = "annule";
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+
         item.addDynamicFieldNotAnalysed( FIELD_FULL, productService.isFull( product.getId( ) ).toString( ) );
-        item.addDynamicFieldNotAnalysed( FIELD_TARIF_REDUIT, productService.isType( product.getId( ), 1 ).toString( ) );
-        item.addDynamicFieldNotAnalysed( FIELD_INVITATION, productService.isType( product.getId( ), 2 ).toString( ) );
-        item.addDynamicFieldNotAnalysed( FIELD_INVITATION_ENFANT, productService.isType( product.getId( ), 3 )
+        item.addDynamicFieldNotAnalysed( FIELD_TARIF_REDUIT, productService.isTypeOffer( product.getId( ), 1, keyDate, now, annuleKey ).toString( ) );
+        item.addDynamicFieldNotAnalysed( FIELD_INVITATION, productService.isTypeOffer( product.getId( ), 2, keyDate, now, annuleKey ).toString( ) );
+        item.addDynamicFieldNotAnalysed( FIELD_INVITATION_ENFANT, productService.isTypeOffer( product.getId( ), 3, keyDate, now, annuleKey )
                 .toString( ) );
+
         item.addDynamicFieldNotAnalysed( FIELD_PROVIDER, product.getProvider( ).getName( ) );
         item.addDynamicFieldNotAnalysed( FIELD_PROVIDER_ADRESS, product.getProvider( ).getAddress( ) );
         item.addDynamicFieldNotAnalysed( FIELD_TITLE, product.getName( ) );
