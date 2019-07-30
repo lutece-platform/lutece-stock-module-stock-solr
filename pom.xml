@@ -10,7 +10,7 @@
     <groupId>fr.paris.lutece.plugins</groupId>
     <artifactId>module-stock-solr</artifactId>
     <packaging>lutece-plugin</packaging>
-    <version>2.0.0</version>
+    <version>2.0.1-SNAPSHOT</version>
     <name>Lutece stock solr module</name>
 
     <repositories>
@@ -61,6 +61,6 @@
         <connection>scm:git:https://github.com/lutece-platform/lutece-stock-module-stock-solr.git</connection>
         <developerConnection>scm:git:https://github.com/lutece-platform/lutece-stock-module-stock-solr.git</developerConnection>
         <url>https://github.com/lutece-platform/lutece-stock-module-stock-solr.git</url>
-      <tag>module-stock-solr-2.0.0</tag>
+      <tag>HEAD</tag>
   </scm>
 </project>
