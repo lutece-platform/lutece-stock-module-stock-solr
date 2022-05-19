@@ -35,5 +35,13 @@
 <!-- 			</content-service-class> -->
 <!-- 		</content-service> -->
 <!-- 	</content-services> -->
-	
+	<!-- Daemons -->
+    <daemons>
+        <daemon>
+            <daemon-id>StockSolrInjectProductsTaskDaemon</daemon-id>
+            <daemon-name>stock-solr.deamon.StockSolrInjectProductsTaskDaemon.name</daemon-name>
+            <daemon-description>stock-solr.deamon.StockSolrInjectProductsTaskDaemon.description</daemon-description>
+            <daemon-class>fr.paris.lutece.plugins.stock.modules.solr.service.daemon.StockSolrInjectProductsTaskDaemon</daemon-class>
+        </daemon>
+    </daemons>
 </plug-in>

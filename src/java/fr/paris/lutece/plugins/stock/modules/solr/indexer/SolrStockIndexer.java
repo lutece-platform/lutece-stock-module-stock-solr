@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2014, Mairie de Paris
+ * Copyright (c) 2002-2021, City of Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,10 +46,12 @@ import fr.paris.lutece.plugins.stock.business.attribute.provider.ProviderAttribu
 import fr.paris.lutece.plugins.stock.business.attribute.provider.ProviderAttributeNum;
 import fr.paris.lutece.plugins.stock.business.category.Category;
 import fr.paris.lutece.plugins.stock.business.offer.Offer;
+import fr.paris.lutece.plugins.stock.business.product.IProductDAO;
 import fr.paris.lutece.plugins.stock.business.product.Product;
 import fr.paris.lutece.plugins.stock.service.IDistrictService;
 import fr.paris.lutece.plugins.stock.service.IOfferService;
 import fr.paris.lutece.plugins.stock.service.IProductService;
+import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
 import fr.paris.lutece.util.url.UrlItem;
@@ -344,8 +346,8 @@ public class SolrStockIndexer implements SolrIndexer
         List<SolrItem> lstItems = null;
 
         int nIdProduct = Integer.parseInt( strIdProduct );
-        // Product product = (Product) productService.findById( nIdProduct );
-        Product product = null;
+        IProductDAO _productDAO = SpringContextService.getBean( "stock.productDAO" );
+        Product product = _productDAO.findById( nIdProduct );
 
         if ( product != null )
         {
