@@ -4,4 +4,3 @@
 <beans>
 	<bean id="stock-solr.solrStockIndexer" class="fr.paris.lutece.plugins.stock.modules.solr.indexer.SolrStockIndexer"/>
 </beans>
- 	
