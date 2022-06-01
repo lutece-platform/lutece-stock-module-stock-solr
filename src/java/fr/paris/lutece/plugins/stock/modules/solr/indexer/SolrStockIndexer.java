@@ -253,7 +253,7 @@ public class SolrStockIndexer implements SolrIndexer
         
         // Indexing show dates
         List<Offer> offers = _offerService.findByProduct(product.getId());
-        Offer offer = new Offer();
+        
         item.addDynamicFieldListDate(FIELD_SHOW_DATES, offers.stream()
         		.map(Offer::getAttributeDateList)
         		.flatMap(Collection::stream)
