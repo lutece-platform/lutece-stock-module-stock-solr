@@ -14,6 +14,7 @@ import fr.paris.lutece.plugins.stock.service.IProductService;
 import fr.paris.lutece.portal.business.indexeraction.IndexerAction;
 import fr.paris.lutece.portal.service.daemon.Daemon;
 import fr.paris.lutece.portal.service.plugin.PluginService;
+import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
 
 public class StockSolrInjectProductsTaskDaemon extends Daemon
@@ -25,21 +26,33 @@ public class StockSolrInjectProductsTaskDaemon extends Daemon
     private static final String TYPE_RESOURCE = "DOCUMENT_STOCK";
 
     private static final String PROPRETY_STOCK_SOLR_ELAPSED_TIME = "stock-solr.daemon.inject.products.task.elapsed.time";
-    
+
     /**
-     * 
+     *
      * {@inheritDoc}
      */
+    @Override
     public void run( )
     {
         int nMinutesAgo = AppPropertiesService.getPropertyInt( PROPRETY_STOCK_SOLR_ELAPSED_TIME, 60 );
         Timestamp timestampStart = new Timestamp( System.currentTimeMillis( ) );
         Timestamp timestampEnd = new Timestamp( System.currentTimeMillis( ) - ( nMinutesAgo * 60 * 1000 ) );
-        List<Integer> listProductId = _productService.getProductsForTaskTimed( getLastRunLogs( ), timestampStart, timestampEnd );
-
-        if ( listProductId != null && !listProductId.isEmpty( ) )
+        if ( null == _productService )
+        {
+            initializeProductService( );
+        }
+        List<Integer> listProductId = _productService.getProductsForTaskTimed( "date", timestampStart, timestampEnd );
+        if ( ( listProductId != null ) && !listProductId.isEmpty( ) )
         {
             listProductId.forEach( nId -> addProductTask( nId, IndexerAction.TASK_MODIFY ) );
+        }
+    }
+
+    private void initializeProductService() {
+        List<IProductService> productServices = SpringContextService.getBeansOfType( IProductService.class );
+        if ( ( productServices != null ) && ( productServices.size( ) > 0 ) )
+        {
+            _productService = productServices.get( 0 );
         }
     }
 
