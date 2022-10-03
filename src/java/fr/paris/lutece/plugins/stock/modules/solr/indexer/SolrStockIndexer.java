@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2014, Mairie de Paris
+ * Copyright (c) 2002-2021, City of Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,19 +33,6 @@
  */
 package fr.paris.lutece.plugins.stock.modules.solr.indexer;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.apache.commons.lang.StringUtils;
-import org.springframework.transaction.annotation.Transactional;
-
 import fr.paris.lutece.plugins.search.solr.business.field.Field;
 import fr.paris.lutece.plugins.search.solr.indexer.SolrIndexer;
 import fr.paris.lutece.plugins.search.solr.indexer.SolrIndexerService;
@@ -64,9 +51,23 @@ import fr.paris.lutece.plugins.stock.business.product.Product;
 import fr.paris.lutece.plugins.stock.service.IDistrictService;
 import fr.paris.lutece.plugins.stock.service.IOfferService;
 import fr.paris.lutece.plugins.stock.service.IProductService;
+import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
 import fr.paris.lutece.util.url.UrlItem;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -111,10 +112,6 @@ public class SolrStockIndexer implements SolrIndexer
     @Inject
     @Named( "stock.offerService" )
     private IOfferService _offerService;
-    
-    @Inject
-    @Named( "stock.productDAO" )
-    private IProductDAO _productDAO;
 
     /**
      * Creates a new SolrPageIndexer
@@ -136,7 +133,7 @@ public class SolrStockIndexer implements SolrIndexer
     public List<String> indexDocuments( )
     {
         List<String> lstErrors = new ArrayList<String>( );
-        
+
         List<Product> listProduct = productService.getAllProduct( );
         for ( Product ticketProduct : listProduct )
         {
@@ -349,7 +346,8 @@ public class SolrStockIndexer implements SolrIndexer
         List<SolrItem> lstItems = null;
 
         int nIdProduct = Integer.parseInt( strIdProduct );
-        Product product = _productDAO.findById(nIdProduct);
+        IProductDAO _productDAO = SpringContextService.getBean( "stock.productDAO" );
+        Product product = _productDAO.findById( nIdProduct );
 
         if ( product != null )
         {
