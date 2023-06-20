@@ -91,7 +91,10 @@ public class StockSolrProductListener
         {
             List<Category> listCategory = provider.getProducts( );
             List<Product> listProduct = new ArrayList<>( );
-            listCategory.forEach( category -> listProduct.addAll( getCategoryProducts( category ) ) );
+            if ( listCategory != null )
+            {
+                listCategory.forEach(category -> listProduct.addAll(getCategoryProducts(category)));
+            }
             processProductsFromCategory( nTask, listProduct );
         }
     }
