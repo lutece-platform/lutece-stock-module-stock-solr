@@ -251,15 +251,27 @@ public class SolrStockIndexer implements SolrIndexer
         // Indexing show dates
         List<Offer> offers = _offerService.findByProduct(product.getId());
         
-        item.addDynamicFieldListDate(FIELD_SHOW_DATES, offers.stream()
-        		.map(Offer::getAttributeDateList)
-        		.flatMap(Collection::stream)
-        		.filter((OfferAttributeDate oad) -> "date".equals(oad.getKey()))
-        		.map(OfferAttributeDate::getValue)
-        		.map(Timestamp::toInstant)
-        		.map(Date::from)
-        		.distinct()
-        		.collect(Collectors.toList()));
+        item.addDynamicFieldListDate(
+        	    FIELD_SHOW_DATES, 
+        	    offers.stream()
+        	        .filter(offer -> !"verrouille".equals(offer.getStatut()) && !"annule".equals(offer.getStatut()))
+        	        .collect(Collectors.collectingAndThen(
+        	            Collectors.toList(),
+        	            filteredOffers -> {
+        	                boolean offerComplet = filteredOffers.stream().allMatch(offer -> offer.getQuantity() == 0);
+        	                return filteredOffers.stream()
+        	                    .filter(offer -> offerComplet || offer.getQuantity() > 0)
+        	                    .map(Offer::getAttributeDateList)
+        	                    .flatMap(Collection::stream)
+        	                    .filter((OfferAttributeDate oad) -> "date".equals(oad.getKey()))
+        	                    .map(OfferAttributeDate::getValue)
+        	                    .map(Timestamp::toInstant)
+        	                    .map(Date::from)
+        	                    .distinct()
+        	                    .collect(Collectors.toList());
+        	            }
+        	        ))
+        	);
         return item;
     }
 
